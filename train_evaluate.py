@@ -1,17 +1,3 @@
-"""
-Main pipeline: trains Random Forest, XGBoost (falls back to sklearn's
-HistGradientBoostingRegressor if xgboost is not installed) and a small ANN
-(MLPRegressor) to predict Remaining Useful Life (RUL) on the NASA C-MAPSS
-data sets, and reports RMSE / MAE / PHM score for each.
-
-Run:
-    python train_evaluate.py
-Outputs:
-    outputs/results_summary.csv
-    outputs/feature_importance_<subset>.csv
-    figures/*.png
-"""
-
 import json
 import sys
 import os
@@ -32,7 +18,7 @@ try:
 except ImportError:
     from sklearn.ensemble import HistGradientBoostingRegressor
     HAVE_XGBOOST = False
-    print("WARNING: xgboost not installed -- using GradientBoosting fallback.")
+
 
 from data_utils import (load_dataset, add_train_rul, get_test_last_cycle,
                          select_features, phm_score)
@@ -46,7 +32,6 @@ importance_frames = {}
 predictions_store = {}
 
 for subset in SUBSETS:
-    print(f"\n===== {subset} =====")
     train, test, rul = load_dataset(DATA_DIR, subset)
     train = add_train_rul(train)
     test_last = get_test_last_cycle(test)
@@ -107,9 +92,6 @@ for subset in SUBSETS:
             fi = pd.Series(model.feature_importances_, index=feat_cols).sort_values(ascending=False)
             importance_frames[(subset, name)] = fi
 
-# ---------------------------------------------------------------------------
-# Save results table
-# ---------------------------------------------------------------------------
 results_df = pd.DataFrame(results_rows)
 out_csv = "outputs/results_summary.csv"
 if os.path.exists(out_csv):
@@ -119,9 +101,6 @@ if os.path.exists(out_csv):
 results_df.to_csv(out_csv, index=False)
 print(f"\nSaved {out_csv}")
 
-# ---------------------------------------------------------------------------
-# Save feature importances (best model = RandomForest, illustrative)
-# ---------------------------------------------------------------------------
 for (subset, name), fi in importance_frames.items():
     fi.to_csv(f"outputs/feature_importance_{subset}_{name}.csv", header=["importance"])
 
