@@ -1,4 +1,3 @@
-"""Generate all figures used in the final report."""
 import json
 import numpy as np
 import pandas as pd
@@ -14,9 +13,6 @@ results = pd.read_csv("outputs/results_summary.csv")
 with open("outputs/predictions_store.json") as f:
     preds = json.load(f)
 
-# ---------------------------------------------------------------------
-# 1. RMSE comparison bar chart across subsets/models
-# ---------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(7, 4.2))
 pivot = results.pivot(index="subset", columns="model", values="RMSE")[["RandomForest", "GradientBoosting", "ANN"]]
 pivot.plot(kind="bar", ax=ax, color=["#4C72B0", "#DD8452", "#55A868"])
@@ -29,9 +25,6 @@ plt.tight_layout()
 plt.savefig("figures/rmse_comparison.png")
 plt.close()
 
-# ---------------------------------------------------------------------
-# 2. Predicted vs actual scatter for FD001, best model
-# ---------------------------------------------------------------------
 subset = "FD001"
 best_model = results[results.subset == subset].sort_values("RMSE").iloc[0]["model"]
 y_true = np.array(preds[subset]["y_test"])
@@ -49,9 +42,6 @@ plt.tight_layout()
 plt.savefig("figures/pred_vs_true_FD001.png")
 plt.close()
 
-# ---------------------------------------------------------------------
-# 3. Feature importance bar chart (Random Forest, FD001)
-# ---------------------------------------------------------------------
 fi = pd.read_csv("outputs/feature_importance_FD001_RandomForest.csv", index_col=0).squeeze("columns")
 fi = fi.sort_values(ascending=True).tail(12)
 fig, ax = plt.subplots(figsize=(6.5, 5))
@@ -62,9 +52,6 @@ plt.tight_layout()
 plt.savefig("figures/feature_importance_FD001.png")
 plt.close()
 
-# ---------------------------------------------------------------------
-# 4. Example sensor degradation trends for a handful of engines (FD001)
-# ---------------------------------------------------------------------
 train, _, _ = load_dataset("data", "FD001")
 train = add_train_rul(train)
 example_units = [1, 25, 50, 75]
@@ -82,9 +69,6 @@ plt.tight_layout()
 plt.savefig("figures/sensor_trend_example.png")
 plt.close()
 
-# ---------------------------------------------------------------------
-# 5. RUL piecewise-linear target illustration
-# ---------------------------------------------------------------------
 sub = train[train.unit == 1]
 fig, ax = plt.subplots(figsize=(6.5, 4))
 ax.plot(sub["cycle"], sub["RUL"], color="#C44E52")
